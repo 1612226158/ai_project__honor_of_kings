@@ -1,0 +1,95 @@
+<div class="draft-page">
+  <a class="skip-link" href="#hero-pool">跳到英雄池</a>
+
+  <!-- 页头：产品标识 + 当前征召规则 -->
+  <app-site-header [preset]="settings.preset" [firstSide]="settings.firstSide" />
+
+  <div class="draft-shell">
+    <!-- 阶段面板：当前回合、征召进度、倒计时与禁用名单 -->
+    <app-phase-panel
+      [eyebrow]="turnEyebrow()"
+      [title]="turnTitleText()"
+      [sub]="turnSubText()"
+      [side]="store.currentSide()"
+      [steps]="stepMarks()"
+      [banned]="store.banned()"
+      [bannedCount]="store.bannedCount()"
+      [seconds]="secondsLeft()"
+      [secondsTotal]="store.stepSeconds()"
+      [bannedNote]="bannedNote()"
+      (reset)="onReset()"
+    />
+
+    <!-- 主工作区：蓝方阵容、英雄池与红方阵容 -->
+    <main class="draft-main">
+      <app-team-slots
+        side="blue"
+        [heroes]="store.bluePicks()"
+        [activeNo]="blueActiveNo()"
+        [statusText]="teamStatus('blue')"
+        [dim]="store.currentSide() !== 'blue'"
+      />
+
+      <app-hero-pool
+        [heroes]="visibleHeroes()"
+        [poolState]="store.poolState()"
+        [labels]="store.labels()"
+        [subLabels]="subLabels()"
+        [count]="heroCount()"
+        [notice]="store.intentNotice()"
+        [subhead]="subhead()"
+        [locked]="store.myPicksDone()"
+        (select)="onChoose($event)"
+      >
+        <app-filter-bar
+          [keyword]="keyword()"
+          [role]="selectedRole()"
+          [roleChips]="roleChips"
+          (keywordChange)="onSearch($event)"
+          (roleChange)="onRole($event)"
+        />
+      </app-hero-pool>
+
+      <app-team-slots
+        side="red"
+        [heroes]="store.redPicks()"
+        [activeNo]="redActiveNo()"
+        [statusText]="teamStatus('red')"
+        [dim]="store.currentSide() !== 'red'"
+      />
+    </main>
+
+    <!-- 底部操作区：对局完成度与主按钮 -->
+    <footer class="action-bar">
+      <div class="completion-summary">
+        <span class="summary-icon" aria-hidden="true">
+          <svg viewBox="0 0 20 20" fill="none">
+            <path
+              d="M4 10.5 8 14l8-8"
+              stroke="currentColor"
+              stroke-width="1.7"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+        </span>
+        <div>
+          <strong>{{ done() ? '双方阵容已确定' : '双方阵容尚未完成' }}</strong>
+          <span>已完成 {{ store.pickCount() }} / 10 次选择，双方各选满 5 位英雄后可确认阵容</span>
+        </div>
+      </div>
+      <button class="btn-confirm" type="button" [disabled]="!done()" (click)="onReset()">
+        {{ done() ? '重新开局' : '确认阵容' }}
+        <svg viewBox="0 0 20 20" fill="none" aria-hidden="true">
+          <path
+            d="M4 10h12m-5-5 5 5-5 5"
+            stroke="currentColor"
+            stroke-width="1.7"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+        </svg>
+      </button>
+    </footer>
+  </div>
+</div>
