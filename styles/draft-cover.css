@@ -1,0 +1,35 @@
+/* Cover art stays inside the center hero viewport, below the existing header. */
+.hero-backdrop { position: absolute; inset: -22px 0 -6px; z-index: 0; pointer-events: none; overflow: hidden; mask-image: linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent), linear-gradient(180deg, transparent, #000 8%, #000 86%, transparent); mask-composite: intersect; }
+.hero-backdrop img { width: 100%; height: 100%; object-fit: cover; object-position: center; }
+.hero-backdrop::after { content: ""; position: absolute; inset: 0; background: linear-gradient(0deg, #102947fa, #10294766 32%, transparent 65%), linear-gradient(90deg, #10294755, transparent 30%, transparent 85%, #10294755); }
+.hero-art { position: absolute; inset: 0; z-index: 1; display: flex; flex-direction: column; justify-content: space-between; align-items: flex-start; padding: 20px 28px 36px; }
+.hero-art > button { align-self: flex-end; background: #102947ce; }
+.hero-art[aria-hidden="true"], .hero-grid[aria-hidden="true"] { pointer-events: none; }
+.hero-art-info { max-width: 100%; text-shadow: 0 2px 12px #081b32, 0 0 25px #081b32; }
+.hero-art-state { color: #f1dfb1; font-size: 12px; letter-spacing: 2px; margin-bottom: 12px; }
+.hero-art h2 { color: #f5f7fa; font-size: clamp(30px, 4vw, 64px); font-weight: 500; line-height: 1.2; letter-spacing: 4px; overflow-wrap: anywhere; }
+.hero-art-title { color: #dfd6c5; font-size: 16px; margin-top: 12px; letter-spacing: 3px; }
+.hero-art-note { color: #c6d5e5; font-size: 12px; line-height: 1.8; margin-top: 18px; }
+.hero-cover-fallback { display: none; color: #d8c38a; font-size: 12px; line-height: 1.8; margin-top: 14px; max-width: 28em; }
+.draft-screen:has(#hero-cover.image-failed) .hero-cover-fallback { display: block; }
+#hero-cover.image-failed { opacity: 0; }
+.show-hero-art { font-size: 11px; padding: 6px 10px; }
+.pool-toolbar { transition: opacity .2s ease; }
+.draft-screen[data-art="true"] .pool-toolbar { opacity: 0; pointer-events: none; }
+.pool-toolbar:has(.show-hero-art:not([hidden])) { flex-wrap: wrap; }
+@media (max-width: 780px) {
+  .hero-art { padding: 12px 10px 28px; }
+  .hero-art > button { font-size: 10px; padding: 8px 10px; }
+  .hero-art-state { font-size: 10px; letter-spacing: 0; }
+  .hero-art-title { font-size: 12px; letter-spacing: 1px; }
+  .hero-art-note, .hero-cover-fallback { font-size: 10px; }
+  .hero-backdrop::after { background: linear-gradient(0deg, #102947fc, #10294799 30%, transparent 75%); }
+}
+@media (max-width: 520px) {
+  .hero-art { padding: 10px 3px 24px; }
+  .hero-art h2 { font-size: 30px; letter-spacing: 1px; }
+  .hero-art-title { line-height: 1.7; }
+  .hero-art-note { margin-top: 12px; }
+  .hero-art-state { margin-bottom: 8px; }
+  .show-hero-art { font-size: 9px; padding: 5px 7px; }
+}

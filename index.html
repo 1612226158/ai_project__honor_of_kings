@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <meta name="theme-color" content="#102947">
+  <title>英雄集结 · 征召对战</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="styles/base.css?v=20261101-lanes-3">
+  <link rel="stylesheet" href="styles/draft.css?v=20261101-lanes-3">
+  <link rel="stylesheet" href="styles/draft-details.css?v=20261101-lanes-3">
+  <link rel="stylesheet" href="styles/draft-cover.css?v=20261101-lanes-3">
+  <link rel="stylesheet" href="styles/poster.css?v=20261101-lanes-3">
+  <!-- Bump the shared revision together when shipping native module changes. -->
+  <script type="importmap">
+    {"imports":{
+      "./js/config.js":"./js/config.js?v=20261101-lanes-3",
+      "./js/data-loader.js":"./js/data-loader.js?v=20261101-lanes-3",
+      "./js/random.js":"./js/random.js?v=20261101-lanes-3",
+      "./js/state.js":"./js/state.js?v=20261101-lanes-3",
+      "./js/timer.js":"./js/timer.js?v=20261101-lanes-3",
+      "./js/draft-controller.js":"./js/draft-controller.js?v=20261101-lanes-3",
+      "./js/draft-view.js":"./js/draft-view.js?v=20261101-lanes-3"
+      ,"./js/presentation.js":"./js/presentation.js?v=20261101-lanes-3"
+      ,"./js/hero-display.js":"./js/hero-display.js?v=20261101-lanes-3"
+      ,"./js/poster-view.js":"./js/poster-view.js?v=20261101-lanes-3"
+      ,"./js/match-view.js":"./js/match-view.js?v=20261101-lanes-3"
+    }}
+  </script>
+  <script type="module" src="js/app.js?v=20261101-lanes-3"></script>
+</head>
+<body>
+  <main id="app" data-phase="loading">
+    <section class="loading-panel" id="resource-status" aria-busy="true">
+      <span class="loading-emblem" aria-hidden="true">Ⅴ</span>
+      <h1 id="status-title">正在准备英雄资料</h1>
+      <p id="status-detail" role="status">正在读取本地资源，请稍候。</p>
+      <button type="button" class="gold-button" id="retry-button" hidden>重新加载</button>
+    </section>
+    <div class="draft-screen" id="draft-root" hidden>
+      <header class="draft-header">
+        <section class="ban-group red" aria-label="红方禁用英雄"><div class="ban-caption"><span>红方禁用</span><span id="red-ban-count">0 / 5</span></div><ol class="ban-list" id="red-bans"></ol></section>
+        <div class="turn-heading"><div class="heading-trace" aria-hidden="true"></div><p id="phase-caption">5V5 征召对战</p><div class="heading-main"><h1 id="turn-title">英雄集结</h1><span id="turn-time" aria-label="剩余秒数" hidden></span></div><p id="turn-detail">双方各选五位英雄</p></div>
+        <section class="ban-group blue" aria-label="蓝方禁用英雄"><div class="ban-caption"><span>蓝方禁用</span><span id="blue-ban-count">0 / 5</span></div><ol class="ban-list" id="blue-bans"></ol></section>
+      </header>
+      <div class="draft-arena">
+        <section class="team-rail red" aria-labelledby="red-team-title"><h2 id="red-team-title">红方阵容<span>RED</span></h2><ol id="red-players" class="player-list"></ol></section>
+        <section class="center-stage" aria-label="英雄选择区">
+          <div class="pool-toolbar"><nav class="profession-tabs" id="profession-tabs" aria-label="英雄职业"></nav><select id="lane-filter" class="lane-filter" aria-label="英雄分路筛选"><option value="all">全部分路</option><option value="farm">发育路</option><option value="mid">中路</option><option value="clash">对抗路</option><option value="jungle">打野</option><option value="roam">游走</option></select><span id="pool-count" class="pool-count"></span><button type="button" id="show-hero-art" class="quiet-button show-hero-art" hidden>返回英雄立绘</button></div>
+          <div class="pool-viewport">
+            <div id="hero-backdrop" class="hero-backdrop" aria-hidden="true" hidden><img id="hero-cover" alt="" decoding="async" hidden></div>
+            <ul class="hero-grid" id="hero-grid" aria-label="英雄池" aria-describedby="hero-keyboard-help"></ul>
+            <p id="hero-keyboard-help" class="sr-only">方向键浏览英雄，回车或空格预选，再按Tab前往锁定按钮。</p>
+            <section id="hero-art" class="hero-art" aria-labelledby="hero-art-name" hidden>
+              <button type="button" id="hero-art-toggle" class="quiet-button">更换英雄</button>
+              <div class="hero-art-info"><p id="hero-art-state" class="hero-art-state"></p><h2 id="hero-art-name"></h2><p id="hero-art-title" class="hero-art-title"></p><p id="hero-art-note" class="hero-art-note"></p><p class="hero-cover-fallback">英雄立绘暂时无法显示，你仍可正常完成禁选。</p></div>
+            </section>
+            <section class="phase-panel" id="phase-panel" aria-labelledby="panel-title">
+              <div class="panel-emblem" aria-hidden="true">Ⅴ</div>
+              <p class="panel-eyebrow" id="panel-eyebrow">你的本局位置</p>
+              <h2 id="panel-title"></h2>
+              <p class="panel-description" id="panel-description"></p>
+              <div id="lineup-summary" class="lineup-summary" hidden></div>
+              <p id="panel-note" class="panel-note"></p>
+            </section>
+          </div>
+          <div class="action-bar">
+            <div class="candidate-info" id="candidate-info"><img id="candidate-image" alt="" hidden><div><span id="candidate-label">候选英雄</span><strong id="candidate-name">尚未选择</strong></div></div>
+            <button type="button" id="primary-action" class="gold-button">开始禁选</button>
+            <span class="action-hint" id="action-hint"></span>
+          </div>
+        </section>
+        <section class="team-rail blue" aria-labelledby="blue-team-title"><h2 id="blue-team-title">蓝方阵容<span>BLUE</span></h2><ol id="blue-players" class="player-list"></ol></section>
+      </div>
+      <footer class="draft-footer">
+        <div class="loadout"><div class="rune-box"><span class="rune-level">150</span><span>国服套装<small>固定铭文</small></span></div><button type="button" class="spell-control" id="skill-button" aria-haspopup="dialog" aria-controls="skill-dialog" aria-expanded="false"><img id="my-skill-image" src="assets/skills/flash.png" alt=""><span><small>召唤师技能</small><strong id="my-skill-name">闪现</strong></span><span class="spell-chevron" aria-hidden="true">⌄</span></button></div>
+        <div class="my-identity"><span class="identity-diamond" aria-hidden="true"></span><span id="my-seat"></span><small>本局仅操控此位置</small></div>
+        <button id="reset-button" type="button" class="quiet-button"><span aria-hidden="true">↻</span> 重新开始</button>
+      </footer>
+      <div id="draft-feedback" class="draft-feedback" aria-hidden="true" hidden></div>
+      <dialog id="skill-dialog" class="skill-dialog" aria-labelledby="skill-dialog-title" aria-describedby="skill-dialog-description">
+        <header class="skill-dialog-header"><div><h2 id="skill-dialog-title">召唤师技能</h2><p id="skill-dialog-description">仅调整你的技能，选人计时会继续。</p></div><button type="button" class="dialog-close" id="skill-close" aria-label="关闭召唤师技能选择">×</button></header>
+        <div id="skill-options" class="skill-options" role="group" aria-label="召唤师技能选项"></div>
+        <footer class="skill-dialog-footer"><div class="skill-selection"><small>本次选择</small><strong id="skill-draft-name">闪现</strong></div><div class="skill-dialog-actions"><button type="button" class="quiet-button" id="skill-cancel">取消</button><button type="button" class="gold-button" id="skill-save">保存技能</button></div></footer>
+      </dialog>
+      <p id="announcer" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></p>
+      <dialog id="lane-warning" class="skill-dialog lane-warning" aria-labelledby="lane-warning-title" aria-describedby="lane-warning-description">
+        <h2 id="lane-warning-title">确认跨分路选择</h2><p id="lane-warning-description"></p><p class="lane-warning-clock" id="lane-warning-clock"></p>
+        <div class="skill-dialog-actions"><button type="button" class="quiet-button" id="lane-warning-cancel">返回选择</button><button type="button" class="gold-button" id="lane-warning-confirm">仍然选择</button></div>
+      </dialog>
+    </div>
+    <section id="poster-root" class="poster-screen" aria-labelledby="poster-title" hidden inert>
+      <header class="poster-header"><div class="poster-heading"><h1 id="poster-title" tabindex="-1">对战阵容</h1><p id="poster-status">双方阵容已确认</p></div><button type="button" class="quiet-button" id="poster-reset">重新开始</button></header>
+      <section class="poster-team blue" aria-labelledby="poster-blue-title"><ol id="poster-blue-cards" class="poster-row"></ol></section>
+      <div class="poster-versus"><span id="poster-blue-title" class="poster-blue-label">蓝方阵容</span><strong aria-label="对阵">VS</strong><span id="poster-red-title" class="poster-red-label">红方阵容</span></div>
+      <section class="poster-team red" aria-labelledby="poster-red-title"><ol id="poster-red-cards" class="poster-row"></ol></section>
+      <footer class="poster-footer"><span id="poster-identity"></span><small>阵容展示 · 5V5 模拟对战</small></footer>
+    </section>
+  </main>
+  <noscript><p class="noscript">请启用 JavaScript 后使用英雄选择工具。</p></noscript>
+</body>
+</html>
+
+
+
+
+
+
+
